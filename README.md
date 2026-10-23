@@ -1,4 +1,4 @@
-# Chiru-san Bot 🌸
+# Melissa Bot 🌸
 
 Bot de WhatsApp desenvolvido em **Node.js** com Baileys, comandos personalizados, inteligência artificial, conversas com personagens e ferramentas para mídia e figurinhas.
 
@@ -29,8 +29,8 @@ Bot de WhatsApp desenvolvido em **Node.js** com Baileys, comandos personalizados
 ## 🚀 Instalação
 
 ```bash
-git clone https://github.com/chirusanrestart/chiru-san-bot.git
-cd chiru-san-bot
+git clone https://github.com/melzinhanina/melissa-bot.git
+cd melissa-bot
 npm install
 ```
 
