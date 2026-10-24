@@ -1,4 +1,6 @@
 import "dotenv/config";
+import path from "node:path";
+import { startHealthServer } from "./services/healthServer.js";
 
 // Exibe o estado da integração Portkey no terminal sem revelar a chave.
 const portkeyConfigured = Boolean(process.env.PORTKEY_API_KEY?.trim());
@@ -554,13 +556,13 @@ async function createAutoSticker(
 
 async function startBotInternal() {
 
+    const authDir = path.resolve(process.env.BAILEYS_AUTH_DIR || "./auth");
+    await fs.mkdir(authDir, { recursive: true, mode: 0o700 });
+
     const {
         state,
         saveCreds
-    } =
-        await useMultiFileAuthState(
-            "./auth"
-        );
+    } = await useMultiFileAuthState(authDir);
 
     const {
         version
@@ -686,7 +688,9 @@ async function startBotInternal() {
                     "🔄 Conexão encerrada; tentando reconectar imediatamente..."
                 );
 
-                startBot().catch(error => {
+                startHealthServer();
+
+startBot().catch(error => {
                     console.error("❌ Falha na reconexão imediata:", error);
                 });
                 } catch (error) {
