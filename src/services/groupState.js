@@ -1,14 +1,28 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { getStoredValue, setStoredValue, isDatabaseConfigured } from "./database.js";
 
 const statePath = path.resolve("data/group-states.json");
 let writeQueue = Promise.resolve();
 
 async function readStates() {
+    if (isDatabaseConfigured()) {
+        try {
+            const stored = await getStoredValue("groups.states");
+            if (stored && typeof stored === "object" && !Array.isArray(stored)) return stored;
+        } catch (error) {
+            console.warn("⚠️ Banco indisponível para estados dos grupos; usando arquivo local:", error?.message || error);
+        }
+    }
+
     try {
         const raw = await fs.readFile(statePath, "utf8");
         const parsed = JSON.parse(raw);
-        return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+        const states = parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+        if (isDatabaseConfigured()) {
+            try { await setStoredValue("groups.states", states); } catch {}
+        }
+        return states;
     } catch (error) {
         if (error.code === "ENOENT") return {};
         console.error("❌ Não consegui ler os estados dos grupos:", error?.message || error);
@@ -17,6 +31,15 @@ async function readStates() {
 }
 
 async function saveStates(states) {
+    if (isDatabaseConfigured()) {
+        try {
+            await setStoredValue("groups.states", states);
+            return;
+        } catch (error) {
+            console.warn("⚠️ Não foi possível salvar estados dos grupos no banco; usando arquivo local:", error?.message || error);
+        }
+    }
+
     await fs.mkdir(path.dirname(statePath), { recursive: true });
     const temporaryPath = `${statePath}.tmp`;
     await fs.writeFile(temporaryPath, `${JSON.stringify(states, null, 2)}\n`, "utf8");
