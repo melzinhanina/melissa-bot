@@ -755,6 +755,8 @@ async function startBot() {
     }
 }
 
+startHealthServer();
+
 startBot().catch(error => {
     console.error("❌ Falha ao iniciar o bot:", error);
 });
